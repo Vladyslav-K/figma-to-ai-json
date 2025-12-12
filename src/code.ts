@@ -30,6 +30,30 @@ async function exportSelection(
 
   return {
     v: '1.0',
+    _meta: {
+      format:
+        'Figma Export for Claude - JSON format for generating React/Tailwind code',
+      types:
+        'frame=container,text=text,img=image,rect=rectangle,' +
+        'ellipse=circle/oval,vector=svg,group=group,instance=component instance',
+      base:
+        'w=width,h=height,minW/maxW=min/max-width,minH/maxH=min/max-height,' +
+        'p=padding(number|[t,r,b,l]),gap=gap,layout=row|col,' +
+        'justify=start|center|end|between,align=start|center|end|stretch,' +
+        'wrap=flex-wrap,pos=abs|rel,x/y=position,bg=background,opacity=0-1,' +
+        'radius=border-radius(number|[tl,tr,br,bl]),shadow=box-shadow,' +
+        'blur=filter blur,overflow=hidden|scroll|visible,ch=children',
+      text:
+        'content=text,font=font-family,size=font-size(px),weight=font-weight,' +
+        'color=text-color,lineH=line-height,letterS=letter-spacing,' +
+        'textAlign=left|center|right|justify,' +
+        'textDecor=underline|line-through|none,' +
+        'textTransform=uppercase|lowercase|capitalize,truncate=text-overflow',
+      image: 'src=image-url,fit=cover|contain|fill|none,alt=alt-text',
+      border: 'border={w=width,c=color,style=solid|dashed|dotted}',
+      tokens: '$cN=tokens.colors.cN,$fN=tokens.fonts.fN,$sN=tokens.shadows.sN',
+      values: 'fill=100%/flex-1,hug=fit-content/auto,number=pixels',
+    },
     name: node.name,
     tokens: options.extractTokens
       ? optimizeTokens(tokens)
