@@ -1,0 +1,465 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        font-size: 12px;
+        color: var(--figma-color-text);
+        background: var(--figma-color-bg);
+        padding: 16px;
+        min-height: 100vh;
+      }
+
+      .header {
+        margin-bottom: 16px;
+      }
+
+      .header h1 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .header p {
+        color: var(--figma-color-text-secondary);
+        font-size: 11px;
+      }
+
+      .selection-info {
+        background: var(--figma-color-bg-secondary);
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 16px;
+      }
+
+      .selection-info.empty {
+        border: 1px dashed var(--figma-color-border);
+        background: transparent;
+        text-align: center;
+        color: var(--figma-color-text-secondary);
+      }
+
+      .selection-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--figma-color-text-tertiary);
+        margin-bottom: 4px;
+      }
+
+      .selection-name {
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .selection-type {
+        font-size: 10px;
+        padding: 2px 6px;
+        background: var(--figma-color-bg-brand-tertiary);
+        color: var(--figma-color-text-brand);
+        border-radius: 4px;
+      }
+
+      .options {
+        margin-bottom: 16px;
+      }
+
+      .option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--figma-color-border);
+      }
+
+      .option:last-child {
+        border-bottom: none;
+      }
+
+      .option input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--figma-color-bg-brand);
+      }
+
+      .option-label {
+        flex: 1;
+      }
+
+      .option-label span {
+        display: block;
+        font-weight: 500;
+      }
+
+      .option-label small {
+        color: var(--figma-color-text-secondary);
+        font-size: 10px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      button {
+        flex: 1;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        border: none;
+      }
+
+      button.primary {
+        background: var(--figma-color-bg-brand);
+        color: white;
+      }
+
+      button.primary:hover:not(:disabled) {
+        background: var(--figma-color-bg-brand-hover);
+      }
+
+      button.primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      button.secondary {
+        background: var(--figma-color-bg-secondary);
+        color: var(--figma-color-text);
+        border: 1px solid var(--figma-color-border);
+      }
+
+      button.secondary:hover {
+        background: var(--figma-color-bg-tertiary);
+      }
+
+      .output {
+        display: none;
+      }
+
+      .output.visible {
+        display: block;
+      }
+
+      .output-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .output-header h3 {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .output-stats {
+        font-size: 10px;
+        color: var(--figma-color-text-secondary);
+      }
+
+      .output-preview {
+        background: var(--figma-color-bg-secondary);
+        border: 1px solid var(--figma-color-border);
+        border-radius: 6px;
+        padding: 12px;
+        max-height: 200px;
+        overflow: auto;
+        font-family: 'SF Mono', Monaco, monospace;
+        font-size: 10px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      .output-actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .output-actions button {
+        flex: 1;
+      }
+
+      .error {
+        background: var(--figma-color-bg-danger);
+        color: var(--figma-color-text-danger);
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        display: none;
+      }
+
+      .error.visible {
+        display: block;
+      }
+
+      .success {
+        background: var(--figma-color-bg-success);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-align: center;
+        margin-top: 8px;
+        display: none;
+        font-weight: 500;
+      }
+
+      .success.visible {
+        display: block;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        color: var(--figma-color-text-secondary);
+      }
+
+      .loading.visible {
+        display: block;
+      }
+
+      .loading::after {
+        content: '';
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--figma-color-border);
+        border-top-color: var(--figma-color-bg-brand);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Export to Claude JSON</h1>
+      <p>Export Figma designs to optimized JSON format</p>
+    </div>
+
+    <div class="selection-info empty" id="selectionInfo">
+      Select a frame or component to export
+    </div>
+
+    <div class="options">
+      <div class="option">
+        <input type="checkbox" id="extractTokens" checked />
+        <label class="option-label" for="extractTokens">
+          <span>Extract Design Tokens</span>
+          <small>Extracts colors, fonts, shadows into reusable tokens</small>
+        </label>
+      </div>
+      <div class="option">
+        <input type="checkbox" id="includeChildren" checked />
+        <label class="option-label" for="includeChildren">
+          <span>Include Children</span>
+          <small>Recursively export all nested elements</small>
+        </label>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="exportBtn" disabled>Export JSON</button>
+    </div>
+
+    <div class="loading" id="loading">Exporting<span></span></div>
+
+    <div class="error" id="error"></div>
+
+    <div class="output" id="output">
+      <div class="output-header">
+        <h3>Exported JSON</h3>
+        <span class="output-stats" id="outputStats"></span>
+      </div>
+      <div class="output-actions">
+        <button class="secondary" id="copyBtn">Copy to Clipboard</button>
+        <button class="secondary" id="downloadBtn">Download JSON</button>
+      </div>
+      <div class="success" id="copySuccess">Copied to clipboard!</div>
+      <pre class="output-preview" id="outputPreview"></pre>
+    </div>
+
+    <script>
+      const selectionInfo = document.getElementById('selectionInfo');
+      const exportBtn = document.getElementById('exportBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const output = document.getElementById('output');
+      const outputPreview = document.getElementById('outputPreview');
+      const outputStats = document.getElementById('outputStats');
+      const errorDiv = document.getElementById('error');
+      const loading = document.getElementById('loading');
+      const copySuccess = document.getElementById('copySuccess');
+
+      const extractTokens = document.getElementById('extractTokens');
+      const includeChildren = document.getElementById('includeChildren');
+
+      let currentJson = '';
+      let hasSelection = false;
+
+      function updateSelectionInfo(data) {
+        hasSelection = data.hasSelection;
+        exportBtn.disabled = !hasSelection;
+
+        if (hasSelection) {
+          selectionInfo.classList.remove('empty');
+          selectionInfo.innerHTML = `
+          <div class="selection-label">Selected</div>
+          <div class="selection-name">
+            ${data.selectionName}
+            <span class="selection-type">${data.selectionType}</span>
+          </div>
+        `;
+        } else {
+          selectionInfo.classList.add('empty');
+          selectionInfo.textContent = 'Select a frame or component to export';
+        }
+      }
+
+      function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.classList.add('visible');
+        loading.classList.remove('visible');
+      }
+
+      function hideError() {
+        errorDiv.classList.remove('visible');
+      }
+
+      function showOutput(json, data) {
+        currentJson = json;
+        outputPreview.textContent = json;
+
+        const size = new Blob([json]).size;
+        const sizeStr =
+          size > 1024 ? `${(size / 1024).toFixed(1)} KB` : `${size} B`;
+        const tokenCount =
+          Object.keys(data.tokens.colors || {}).length +
+          Object.keys(data.tokens.fonts || {}).length +
+          Object.keys(data.tokens.shadows || {}).length;
+
+        outputStats.textContent = `${sizeStr} • ${tokenCount} tokens`;
+
+        output.classList.add('visible');
+        loading.classList.remove('visible');
+      }
+
+      function hideOutput() {
+        output.classList.remove('visible');
+        copySuccess.classList.remove('visible');
+      }
+
+      exportBtn.addEventListener('click', () => {
+        hideError();
+        hideOutput();
+        loading.classList.add('visible');
+
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: 'export',
+              options: {
+                extractTokens: extractTokens.checked,
+                includeChildren: includeChildren.checked,
+              },
+            },
+          },
+          '*'
+        );
+      });
+
+      copyBtn.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(currentJson);
+          } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = currentJson;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+          }
+          copySuccess.classList.add('visible');
+          setTimeout(() => {
+            copySuccess.classList.remove('visible');
+          }, 2000);
+        } catch (err) {
+          const textarea = document.createElement('textarea');
+          textarea.value = currentJson;
+          textarea.style.position = 'fixed';
+          textarea.style.opacity = '0';
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand('copy');
+            copySuccess.classList.add('visible');
+            setTimeout(() => {
+              copySuccess.classList.remove('visible');
+            }, 2000);
+          } catch (e) {
+            showError('Failed to copy to clipboard');
+          }
+          document.body.removeChild(textarea);
+        }
+      });
+
+      downloadBtn.addEventListener('click', () => {
+        const blob = new Blob([currentJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `figma-export-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      window.onmessage = (event) => {
+        const msg = event.data.pluginMessage;
+
+        if (msg.type === 'selection') {
+          updateSelectionInfo(msg);
+        }
+
+        if (msg.type === 'export') {
+          showOutput(msg.json, msg.data);
+        }
+
+        if (msg.type === 'error') {
+          showError(msg.error);
+        }
+      };
+    </script>
+  </body>
+</html>

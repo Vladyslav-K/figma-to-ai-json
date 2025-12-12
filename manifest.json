@@ -1,0 +1,14 @@
+{
+	"name": "Export to Claude JSON",
+	"id": "figma-to-claude-export",
+	"api": "1.0.0",
+	"main": "dist/code.js",
+	"ui": "dist/ui.html",
+	"capabilities": [],
+	"enableProposedApi": false,
+	"editorType": ["figma"],
+	"documentAccess": "dynamic-page",
+	"networkAccess": {
+		"allowedDomains": ["none"]
+	}
+}
