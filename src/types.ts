@@ -121,8 +121,20 @@ export type ExportNode =
   | GroupNode
   | InstanceNode;
 
+export interface MetaInfo {
+  format: string;
+  types: string;
+  base: string;
+  text: string;
+  image: string;
+  border: string;
+  tokens: string;
+  values: string;
+}
+
 export interface ExportResult {
   v: string;
+  _meta: MetaInfo;
   name: string;
   tokens: DesignTokens;
   tree: ExportNode;
