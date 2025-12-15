@@ -7,6 +7,9 @@ import type {
   GradientBackground,
 } from './types';
 import { TokenExtractor } from './tokens';
+import { analyzeSemantics } from './semantic';
+import { detectPattern } from './patterns';
+import { analyzeResponsive } from './responsive';
 
 interface TransformContext {
   tokenExtractor: TokenExtractor;
@@ -174,6 +177,7 @@ function extractBackground(
 function extractBorder(
   strokes: RawNodeData['strokes'],
   strokeWeight: number | undefined,
+  dashPattern: number[] | undefined,
   ctx: TransformContext
 ): BorderStyle | undefined {
   if (!strokes || strokes.length === 0 || !strokeWeight) return undefined;
@@ -185,10 +189,21 @@ function extractBorder(
   const { r, g, b } = visibleStroke.color;
   const color = rgbToHex(r, g, b);
 
+  let style: 'solid' | 'dashed' | 'dotted' = 'solid';
+  if (dashPattern && dashPattern.length > 0) {
+    if (dashPattern.length === 2 && dashPattern[0] === dashPattern[1]) {
+      style = 'dashed';
+    } else if (dashPattern.some((d) => d <= 2)) {
+      style = 'dotted';
+    } else {
+      style = 'dashed';
+    }
+  }
+
   return {
     w: strokeWeight,
     c: ctx.useTokens ? ctx.tokenExtractor.addColor(color) : color,
-    style: 'solid',
+    style,
   };
 }
 
@@ -417,6 +432,88 @@ function transformTextNode(
     }
   }
 
+  if (raw.paragraphSpacing && raw.paragraphSpacing > 0) {
+    (node as ExportNode & { paragraphSpacing?: number }).paragraphSpacing =
+      raw.paragraphSpacing;
+  }
+
+  if (raw.textAutoResize && raw.textAutoResize !== 'NONE') {
+    const resizeMap: Record<string, 'height' | 'width-height'> = {
+      HEIGHT: 'height',
+      WIDTH_AND_HEIGHT: 'width-height',
+      TRUNCATE: 'height',
+    };
+    const mapped = resizeMap[raw.textAutoResize];
+    if (mapped) {
+      (node as ExportNode & { autoResize?: string }).autoResize = mapped;
+    }
+  }
+
+  if (raw.styledTextSegments && raw.styledTextSegments.length > 1) {
+    const richText = raw.styledTextSegments.map((seg) => {
+      const segment: {
+        text: string;
+        font?: string;
+        size?: number;
+        weight?: number;
+        color?: string;
+        italic?: boolean;
+        underline?: boolean;
+        strikethrough?: boolean;
+        link?: string;
+      } = {
+        text: seg.characters,
+      };
+
+      if (seg.fontName && seg.fontName.family) {
+        segment.font = ctx.useTokens
+          ? ctx.tokenExtractor.addFont(seg.fontName.family)
+          : seg.fontName.family;
+
+        if (
+          seg.fontName.style &&
+          seg.fontName.style.toLowerCase().includes('italic')
+        ) {
+          segment.italic = true;
+        }
+      }
+
+      if (seg.fontSize) {
+        segment.size = seg.fontSize;
+      }
+
+      if (seg.fontWeight) {
+        segment.weight = seg.fontWeight;
+      }
+
+      if (seg.fills && seg.fills.length > 0) {
+        const fill = seg.fills.find(
+          (f) => f.visible !== false && f.type === 'SOLID'
+        );
+        if (fill && fill.color) {
+          const color = rgbToHex(fill.color.r, fill.color.g, fill.color.b);
+          segment.color = ctx.useTokens
+            ? ctx.tokenExtractor.addColor(color)
+            : color;
+        }
+      }
+
+      if (seg.textDecoration === 'UNDERLINE') {
+        segment.underline = true;
+      } else if (seg.textDecoration === 'STRIKETHROUGH') {
+        segment.strikethrough = true;
+      }
+
+      if (seg.hyperlink && seg.hyperlink.value) {
+        segment.link = seg.hyperlink.value;
+      }
+
+      return segment;
+    });
+
+    (node as ExportNode & { richText?: typeof richText }).richText = richText;
+  }
+
   return node;
 }
 
@@ -453,7 +550,100 @@ function transformImageNode(
     }
   }
 
+  if (raw.imageRef) {
+    (node as ExportNode & { imageRef?: string }).imageRef = raw.imageRef;
+  }
+
+  (node as ExportNode & { nodeId?: string }).nodeId = raw.id;
+
+  (
+    node as ExportNode & { originalSize?: { w: number; h: number } }
+  ).originalSize = {
+    w: Math.round(raw.width),
+    h: Math.round(raw.height),
+  };
+
+  if (raw.imageTransform) {
+    const [[a, b, tx], [c, d, ty]] = raw.imageTransform;
+
+    const scaleX = Math.sqrt(a * a + c * c);
+    const scaleY = Math.sqrt(b * b + d * d);
+
+    if (scaleX !== 1 || scaleY !== 1 || tx !== 0 || ty !== 0) {
+      const cropX = -tx / scaleX;
+      const cropY = -ty / scaleY;
+      const cropW = 1 / scaleX;
+      const cropH = 1 / scaleY;
+
+      if (cropX > 0.01 || cropY > 0.01 || cropW < 0.99 || cropH < 0.99) {
+        (
+          node as ExportNode & {
+            cropRect?: { x: number; y: number; w: number; h: number };
+          }
+        ).cropRect = {
+          x: Math.round(cropX * 100) / 100,
+          y: Math.round(cropY * 100) / 100,
+          w: Math.round(cropW * 100) / 100,
+          h: Math.round(cropH * 100) / 100,
+        };
+      }
+    }
+  }
+
   return node;
+}
+
+function mapTrigger(trigger: string): 'click' | 'hover' | 'press' | 'drag' {
+  const triggerMap: Record<string, 'click' | 'hover' | 'press' | 'drag'> = {
+    ON_CLICK: 'click',
+    ON_HOVER: 'hover',
+    ON_PRESS: 'press',
+    ON_DRAG: 'drag',
+    MOUSE_ENTER: 'hover',
+    MOUSE_LEAVE: 'hover',
+    MOUSE_UP: 'click',
+    MOUSE_DOWN: 'press',
+  };
+  return triggerMap[trigger] || 'click';
+}
+
+function mapAction(
+  action: string
+): 'navigate' | 'overlay' | 'swap' | 'scroll' | 'url' | 'back' | 'close' {
+  const actionMap: Record<
+    string,
+    'navigate' | 'overlay' | 'swap' | 'scroll' | 'url' | 'back' | 'close'
+  > = {
+    NODE: 'navigate',
+    OVERLAY: 'overlay',
+    SWAP: 'swap',
+    SCROLL_TO: 'scroll',
+    URL: 'url',
+    BACK: 'back',
+    CLOSE: 'close',
+  };
+  return actionMap[action] || 'navigate';
+}
+
+function mapBlendMode(mode: string): string | undefined {
+  const modeMap: Record<string, string> = {
+    MULTIPLY: 'multiply',
+    SCREEN: 'screen',
+    OVERLAY: 'overlay',
+    DARKEN: 'darken',
+    LIGHTEN: 'lighten',
+    COLOR_DODGE: 'color-dodge',
+    COLOR_BURN: 'color-burn',
+    HARD_LIGHT: 'hard-light',
+    SOFT_LIGHT: 'soft-light',
+    DIFFERENCE: 'difference',
+    EXCLUSION: 'exclusion',
+    HUE: 'hue',
+    SATURATION: 'saturation',
+    COLOR: 'color',
+    LUMINOSITY: 'luminosity',
+  };
+  return modeMap[mode];
 }
 
 export function transformNode(
@@ -535,7 +725,12 @@ export function transformNode(
     node.radius = radius;
   }
 
-  const border = extractBorder(raw.strokes, raw.strokeWeight, ctx);
+  const border = extractBorder(
+    raw.strokes,
+    raw.strokeWeight,
+    raw.dashPattern,
+    ctx
+  );
   if (border) {
     node.border = border;
   }
@@ -552,6 +747,83 @@ export function transformNode(
     node.blur = blurEffect.radius;
   }
 
+  const backdropBlurEffect = raw.effects?.find(
+    (e) => e.type === 'LAYER_BLUR' && e.visible !== false
+  );
+  if (backdropBlurEffect && backdropBlurEffect.radius) {
+    (node as ExportNode & { backdropBlur?: number }).backdropBlur =
+      backdropBlurEffect.radius;
+  }
+
+  if (raw.blendMode) {
+    const mappedBlend = mapBlendMode(raw.blendMode);
+    if (mappedBlend) {
+      (node as ExportNode & { blendMode?: string }).blendMode = mappedBlend;
+    }
+  }
+
+  if (raw.rotation) {
+    (node as ExportNode & { rotate?: number }).rotate =
+      Math.round(raw.rotation * 100) / 100;
+  }
+
+  if (raw.width && raw.height && raw.width !== raw.height) {
+    const ratio = raw.width / raw.height;
+    if (Math.abs(ratio - Math.round(ratio * 100) / 100) < 0.01) {
+      const commonRatios = [16 / 9, 4 / 3, 3 / 2, 1 / 1, 9 / 16, 3 / 4, 2 / 3];
+      const isCommon = commonRatios.some((r) => Math.abs(ratio - r) < 0.05);
+      if (isCommon) {
+        (node as ExportNode & { aspectRatio?: number }).aspectRatio =
+          Math.round(ratio * 100) / 100;
+      }
+    }
+  }
+
+  if (raw.layoutPositioning === 'ABSOLUTE' && raw.orderIndex !== undefined) {
+    (node as ExportNode & { zIndex?: number }).zIndex = raw.orderIndex + 1;
+  }
+
+  if (raw.orderIndex !== undefined && raw.siblingCount !== undefined) {
+    if (raw.siblingCount > 1) {
+      (node as ExportNode & { order?: number }).order = raw.orderIndex;
+
+      if (raw.orderIndex === 0) {
+        (node as ExportNode & { isFirst?: boolean }).isFirst = true;
+      }
+
+      if (raw.orderIndex === raw.siblingCount - 1) {
+        (node as ExportNode & { isLast?: boolean }).isLast = true;
+      }
+    }
+  }
+
+  const responsive = analyzeResponsive(raw, raw.parentLayoutMode);
+  if (responsive) {
+    node.responsive = responsive;
+  }
+
+  const devInfo: {
+    notes?: string;
+    description?: string;
+    pluginData?: Record<string, string>;
+  } = {};
+
+  if (raw.description) {
+    devInfo.description = raw.description;
+  }
+
+  if (raw.devNotes) {
+    devInfo.notes = raw.devNotes;
+  }
+
+  if (raw.pluginData && Object.keys(raw.pluginData).length > 0) {
+    devInfo.pluginData = raw.pluginData;
+  }
+
+  if (Object.keys(devInfo).length > 0) {
+    (node as ExportNode & { devInfo?: typeof devInfo }).devInfo = devInfo;
+  }
+
   if (raw.clipsContent) {
     node.overflow = 'hidden';
   }
@@ -563,6 +835,69 @@ export function transformNode(
   if (raw.type === 'INSTANCE' && raw.mainComponent) {
     (node as ExportNode & { componentName?: string }).componentName =
       raw.mainComponent.name;
+
+    if (
+      raw.mainComponent.variantProperties &&
+      Object.keys(raw.mainComponent.variantProperties).length > 0
+    ) {
+      (
+        node as ExportNode & { variantProps?: Record<string, string> }
+      ).variantProps = raw.mainComponent.variantProperties;
+    }
+
+    if (raw.mainComponent.description) {
+      (node as ExportNode & { componentDesc?: string }).componentDesc =
+        raw.mainComponent.description;
+    }
+  }
+
+  const semantic = analyzeSemantics(raw);
+  if (semantic) {
+    node.semantic = semantic;
+  }
+
+  if (raw.reactions && raw.reactions.length > 0) {
+    const interactions = raw.reactions.map((r) => {
+      const interaction: {
+        trigger: 'click' | 'hover' | 'press' | 'drag';
+        action:
+          | 'navigate'
+          | 'overlay'
+          | 'swap'
+          | 'scroll'
+          | 'url'
+          | 'back'
+          | 'close';
+        dest?: string;
+        url?: string;
+        transition?: string;
+      } = {
+        trigger: mapTrigger(r.trigger),
+        action: mapAction(r.action),
+      };
+
+      if (r.destinationName) {
+        interaction.dest = r.destinationName;
+      }
+
+      if (r.url) {
+        interaction.url = r.url;
+      }
+
+      if (r.transition) {
+        interaction.transition = r.transition.toLowerCase();
+      }
+
+      return interaction;
+    });
+
+    (node as ExportNode & { interactions?: typeof interactions }).interactions =
+      interactions;
+  }
+
+  const patternInfo = detectPattern(raw);
+  if (patternInfo) {
+    node.patternInfo = patternInfo;
   }
 
   return node;

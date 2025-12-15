@@ -5,6 +5,95 @@ export interface ExportOptions {
   maxDepth: number;
 }
 
+export type Breakpoint = 'mobile' | 'tablet' | 'desktop' | 'wide';
+
+export interface ResponsiveInfo {
+  breakpoint?: Breakpoint;
+  fluid?: boolean;
+  grow?: number;
+  shrink?: number;
+  basis?: number | 'auto';
+}
+
+export interface DevAnnotations {
+  notes?: string;
+  description?: string;
+  pluginData?: Record<string, string>;
+}
+
+export type UIPattern =
+  | 'grid'
+  | 'list'
+  | 'carousel'
+  | 'tabs'
+  | 'accordion'
+  | 'form'
+  | 'table'
+  | 'breadcrumbs'
+  | 'pagination'
+  | 'stepper'
+  | 'gallery';
+
+export interface PatternInfo {
+  pattern: UIPattern;
+  itemCount?: number;
+  columns?: number;
+  rows?: number;
+}
+
+export type SemanticRole =
+  | 'button'
+  | 'input'
+  | 'card'
+  | 'nav'
+  | 'header'
+  | 'footer'
+  | 'modal'
+  | 'badge'
+  | 'avatar'
+  | 'icon'
+  | 'link'
+  | 'list'
+  | 'listItem'
+  | 'tab'
+  | 'menu'
+  | 'tooltip'
+  | 'dropdown';
+
+export type ComponentState =
+  | 'default'
+  | 'hover'
+  | 'active'
+  | 'disabled'
+  | 'focus'
+  | 'selected'
+  | 'loading';
+
+export interface SemanticInfo {
+  role?: SemanticRole;
+  interactive?: boolean;
+  state?: ComponentState;
+}
+
+export type InteractionTrigger = 'click' | 'hover' | 'press' | 'drag';
+
+export type InteractionAction =
+  | 'navigate'
+  | 'overlay'
+  | 'swap'
+  | 'scroll'
+  | 'url'
+  | 'back'
+  | 'close';
+
+export interface InteractionInfo {
+  trigger: InteractionTrigger;
+  action: InteractionAction;
+  dest?: string;
+  url?: string;
+  transition?: string;
+}
+
 export interface DesignTokens {
   colors: Record<string, string>;
   fonts: Record<string, string>;
@@ -26,6 +115,7 @@ export interface BorderStyle {
   w: number;
   c: string;
   style: 'solid' | 'dashed' | 'dotted';
+  sides?: 'all' | 'top' | 'right' | 'bottom' | 'left';
 }
 
 export interface Constraints {
@@ -59,9 +149,34 @@ export interface BaseNode {
   border?: BorderStyle;
   shadow?: string;
   blur?: number;
+  backdropBlur?: number;
+  blendMode?: string;
+  rotate?: number;
+  aspectRatio?: number;
+  zIndex?: number;
+  order?: number;
+  isFirst?: boolean;
+  isLast?: boolean;
+  responsive?: ResponsiveInfo;
+  devInfo?: DevAnnotations;
   visible?: boolean;
   overflow?: 'hidden' | 'scroll' | 'visible';
+  semantic?: SemanticInfo;
+  interactions?: InteractionInfo[];
+  patternInfo?: PatternInfo;
   ch?: ExportNode[];
+}
+
+export interface TextSegment {
+  text: string;
+  font?: string;
+  size?: number;
+  weight?: number;
+  color?: string;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+  link?: string;
 }
 
 export interface TextNode extends BaseNode {
@@ -77,6 +192,9 @@ export interface TextNode extends BaseNode {
   textDecor?: 'underline' | 'line-through' | 'none';
   textTransform?: 'uppercase' | 'lowercase' | 'capitalize' | 'none';
   truncate?: boolean | number;
+  paragraphSpacing?: number;
+  autoResize?: 'none' | 'height' | 'width-height';
+  richText?: TextSegment[];
 }
 
 export interface ImageNode extends BaseNode {
@@ -84,6 +202,10 @@ export interface ImageNode extends BaseNode {
   src?: string;
   fit?: 'cover' | 'contain' | 'fill' | 'none';
   alt?: string;
+  imageRef?: string;
+  originalSize?: { w: number; h: number };
+  cropRect?: { x: number; y: number; w: number; h: number };
+  nodeId?: string;
 }
 
 export interface FrameNode extends BaseNode {
@@ -109,6 +231,8 @@ export interface GroupNode extends BaseNode {
 export interface InstanceNode extends BaseNode {
   type: 'instance';
   componentName?: string;
+  variantProps?: Record<string, string>;
+  componentDesc?: string;
 }
 
 export type ExportNode =
@@ -130,6 +254,13 @@ export interface MetaInfo {
   border: string;
   tokens: string;
   values: string;
+  semantic: string;
+  interactions: string;
+  patterns: string;
+  responsive: string;
+  devInfo: string;
+  tailwind: string;
+  react: string;
 }
 
 export interface ExportResult {
