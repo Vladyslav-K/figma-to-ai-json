@@ -1,10 +1,17 @@
 # Figma to AI JSON
 
-Figma plugin that exports designs to an AI-optimized JSON format for LLMs (Claude, ChatGPT, Gemini, etc.) to generate pixel-perfect React/Tailwind code.
+Figma plugin that exports designs to a self-documenting AI-optimized JSON format. The export includes comprehensive metadata (`_meta`) that guides LLMs (Claude, ChatGPT, Gemini) to generate pixel-perfect React/Tailwind code without external documentation.
+
+## Key Features
+
+- **Self-Documenting Format** — `_meta` field contains all mappings and instructions for AI
+- **Semantic Analysis** — detects UI roles (button, input, card, icon, avatar)
+- **Pattern Detection** — identifies grids, lists, forms, tabs, carousels
+- **Design Tokens** — extracts colors, fonts, shadows into reusable references
+- **Responsive Hints** — detects breakpoints and adaptive layouts
+- **~70% Smaller** — short keys and token deduplication minimize AI token usage
 
 ## Installation
-
-### 1. Build the plugin
 
 ```bash
 # Install dependencies
@@ -14,126 +21,94 @@ npm install
 npm run build
 ```
 
-### 2. Add to Figma
-
-1. Open Figma Desktop
-2. Go to **Plugins** → **Development** → **Import plugin from manifest...**
-3. Select the `manifest.json` file from this project folder
-4. The plugin is now available in **Plugins** → **Development** → **Figma to AI JSON**
+Then in Figma Desktop:
+1. **Plugins** → **Development** → **Import plugin from manifest...**
+2. Select `manifest.json` from this project
 
 ## Usage
 
-### Step 1: Select a design
-
-Select any frame, component, or element in Figma that you want to export.
-
-### Step 2: Run the plugin
-
-Open **Plugins** → **Development** → **Figma to AI JSON**
-
-### Step 3: Configure options
-
-- **Extract Design Tokens** — extracts colors, fonts, and shadows into reusable tokens
-- **Include Children** — recursively exports all nested elements
-
-### Step 4: Export
-
-Click **Export JSON** button, then:
-- **Copy to Clipboard** — for pasting directly into AI chat
-- **Download JSON** — to save as a file
-
-### Step 5: Generate code with AI
-
-Paste the JSON into your preferred AI assistant (Claude, ChatGPT, Gemini, etc.) with a prompt like:
+1. **Select** a frame or component in Figma
+2. **Run** plugin: **Plugins** → **Development** → **Figma to AI JSON**
+3. **Export** and copy to clipboard
+4. **Paste** into AI with prompt:
 
 ```
-Here's a Figma export in JSON format. Please generate a React component
-with Tailwind CSS that matches this design:
-
-[paste JSON here]
+Here's a Figma export. Generate a React component with Tailwind CSS:
+[paste JSON]
 ```
 
-## How It Works
+The AI will use embedded `_meta` documentation to interpret the format correctly.
 
-The plugin processes Figma designs through several stages:
-
-```
-Select in Figma → Parse → Transform → Extract Tokens → Export JSON
-```
-
-1. **Parser** — extracts raw Figma properties (layout, styles, text, effects)
-2. **Transformer** — converts to optimized format with short keys
-3. **Token Extractor** — identifies repeated values and creates reusable tokens
-
-## Export Format
-
-The plugin generates a compact JSON structure:
+## Export Structure
 
 ```json
 {
   "v": "1.0",
-  "name": "Button",
+  "_meta": {
+    "description": "Self-documenting format guide for AI",
+    "types": { "frame": "div", "text": "p/span" },
+    "properties": { "w": "width", "h": "height", "p": "padding" },
+    "tailwindMappings": { "layout:row": "flex-row", "layout:col": "flex-col" },
+    "semanticRoles": { "button": "<button>", "input": "<input>" }
+  },
   "tokens": {
-    "colors": { "c0": "#3B82F6", "c1": "#FFFFFF" },
+    "colors": { "c0": "#3B82F6" },
     "fonts": { "f0": "Inter" },
     "shadows": { "s0": "0 4px 6px rgba(0,0,0,0.1)" }
   },
   "tree": {
     "type": "frame",
+    "sem": "button",
     "layout": "row",
     "w": 120,
     "h": 40,
-    "p": [12, 24, 12, 24],
     "bg": "$c0",
     "radius": 8,
-    "ch": [
-      {
-        "type": "text",
-        "content": "Click me",
-        "font": "$f0",
-        "fontSize": 14,
-        "fill": "$c1"
-      }
-    ]
+    "ch": [...]
   }
 }
 ```
 
-### Key mappings
+### Property Shortcuts
 
-| Short | Meaning |
-|-------|---------|
-| `w` | width |
-| `h` | height |
-| `p` | padding |
-| `bg` | background |
-| `ch` | children |
-| `layout` | flex direction (`row` / `col`) |
-| `"fill"` | flex-grow (100% width/height) |
-| `"hug"` | fit-content (auto) |
-| `$c0` | token reference (color #0) |
+| Key | Meaning | Key | Meaning |
+|-----|---------|-----|---------|
+| `w` | width | `h` | height |
+| `p` | padding | `bg` | background |
+| `ch` | children | `sem` | semantic role |
+| `layout` | flex direction | `gap` | spacing |
+| `"fill"` | 100% (flex-grow) | `"hug"` | fit-content |
+| `$c0` | color token | `$f0` | font token |
 
-### Why this format?
+## Processing Pipeline
 
-- **~70% smaller** than verbose JSON
-- **Token references** eliminate repetition
-- **Short keys** reduce AI token usage
-- **Semantic values** (`fill`, `hug`) map directly to CSS
+```
+Figma Selection
+    ↓
+parseNode() ─────────── Extract raw properties
+    ↓
+transformTree() ─────── Convert to optimized format
+    ├─ TokenExtractor ── Deduplicate colors/fonts/shadows
+    ├─ analyzeSemantics ─ Detect UI roles
+    ├─ detectPattern ──── Identify UI patterns
+    └─ analyzeResponsive ─ Extract breakpoints
+    ↓
+Export JSON with _meta
+```
 
 ## Development
 
 ```bash
-# Watch mode (auto-rebuild on changes)
-npm run watch
-
-# Type check
-npm run typecheck
-
-# Format code
-npm run format
+npm run watch      # Auto-rebuild on changes
+npm run typecheck  # Type check
+npm run format     # Format code
 ```
 
 ## Documentation
 
 - [FORMAT_SPEC.md](./FORMAT_SPEC.md) — complete format specification
-- [DECODER.md](./DECODER.md) — guide for AI to interpret the JSON
+- [DECODER.md](./DECODER.md) — guide for AI interpretation
+
+## License
+
+MIT
