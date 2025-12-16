@@ -1,7 +1,7 @@
 {
-  "name": "figma-to-claude-export",
+  "name": "figma-to-ai-json",
   "version": "1.0.0",
-  "description": "Export Figma designs to optimized JSON format for Claude AI",
+  "description": "Figma plugin that exports designs to AI-optimized JSON format for LLMs",
   "scripts": {
     "build": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6 && cp src/ui.html dist/ui.html",
     "watch": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6 --watch",

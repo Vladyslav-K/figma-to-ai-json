@@ -2,7 +2,7 @@
 
 ## Overview
 
-This format is optimized for Claude to generate pixel-perfect React/Tailwind code from Figma designs.
+This format is optimized for AI/LLMs to generate pixel-perfect React/Tailwind code from Figma designs.
 
 ## Design Principles
 

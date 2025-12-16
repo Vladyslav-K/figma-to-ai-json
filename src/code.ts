@@ -32,7 +32,7 @@ async function exportSelection(
     v: '1.0',
     _meta: {
       format:
-        'Figma Export for Claude - JSON format for generating React/Tailwind code. ' +
+        'Figma to AI JSON - Optimized format for LLMs to generate React/Tailwind code. ' +
         'This format describes UI components with layout, styling, and semantic information.',
       types:
         'frame=div/section/container,text=p/span/h1-h6,img=img/Image,' +

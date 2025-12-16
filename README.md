@@ -1,6 +1,6 @@
-# Export to Claude JSON
+# Figma to AI JSON
 
-Figma plugin that exports designs to an optimized JSON format for Claude AI to generate pixel-perfect React/Tailwind code.
+Figma plugin that exports designs to an AI-optimized JSON format for LLMs (Claude, ChatGPT, Gemini, etc.) to generate pixel-perfect React/Tailwind code.
 
 ## Installation
 
@@ -19,7 +19,7 @@ npm run build
 1. Open Figma Desktop
 2. Go to **Plugins** → **Development** → **Import plugin from manifest...**
 3. Select the `manifest.json` file from this project folder
-4. The plugin is now available in **Plugins** → **Development** → **Export to Claude JSON**
+4. The plugin is now available in **Plugins** → **Development** → **Figma to AI JSON**
 
 ## Usage
 
@@ -29,7 +29,7 @@ Select any frame, component, or element in Figma that you want to export.
 
 ### Step 2: Run the plugin
 
-Open **Plugins** → **Development** → **Export to Claude JSON**
+Open **Plugins** → **Development** → **Figma to AI JSON**
 
 ### Step 3: Configure options
 
@@ -39,12 +39,12 @@ Open **Plugins** → **Development** → **Export to Claude JSON**
 ### Step 4: Export
 
 Click **Export JSON** button, then:
-- **Copy to Clipboard** — for pasting directly into Claude
+- **Copy to Clipboard** — for pasting directly into AI chat
 - **Download JSON** — to save as a file
 
-### Step 5: Generate code with Claude
+### Step 5: Generate code with AI
 
-Paste the JSON into Claude with a prompt like:
+Paste the JSON into your preferred AI assistant (Claude, ChatGPT, Gemini, etc.) with a prompt like:
 
 ```
 Here's a Figma export in JSON format. Please generate a React component
@@ -117,7 +117,7 @@ The plugin generates a compact JSON structure:
 
 - **~70% smaller** than verbose JSON
 - **Token references** eliminate repetition
-- **Short keys** reduce Claude's token usage
+- **Short keys** reduce AI token usage
 - **Semantic values** (`fill`, `hug`) map directly to CSS
 
 ## Development
@@ -136,4 +136,4 @@ npm run format
 ## Documentation
 
 - [FORMAT_SPEC.md](./FORMAT_SPEC.md) — complete format specification
-- [DECODER.md](./DECODER.md) — guide for Claude to interpret the JSON
+- [DECODER.md](./DECODER.md) — guide for AI to interpret the JSON

@@ -1,6 +1,6 @@
-# Figma JSON Decoder for Claude
+# Figma JSON Decoder for AI
 
-When the user provides a JSON export from the "Export to Claude JSON" Figma plugin, use this guide to generate pixel-perfect React/Tailwind code.
+When the user provides a JSON export from the "Figma to AI JSON" plugin, use this guide to generate pixel-perfect React/Tailwind code.
 
 ## JSON Structure
 
