@@ -1,6 +1,6 @@
 {
 	"name": "Figma to AI JSON",
-	"id": "figma-to-ai-json",
+	"id": "1587567698187162528",
 	"api": "1.0.0",
 	"main": "dist/code.js",
 	"ui": "dist/ui.html",
