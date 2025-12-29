@@ -29,10 +29,10 @@ The `_meta` object documents:
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Build the plugin
-npm run build
+pnpm run build
 ```
 
 Then in Figma Desktop:
@@ -119,9 +119,9 @@ Export JSON with _meta
 ## Development
 
 ```bash
-npm run watch      # Auto-rebuild on changes
-npm run typecheck  # Type check
-npm run format     # Format code
+pnpm run watch      # Auto-rebuild on changes
+pnpm run typecheck  # Type check
+pnpm run format     # Format code
 ```
 
 ## Documentation
