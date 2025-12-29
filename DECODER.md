@@ -1,6 +1,6 @@
 # Figma JSON Decoder for AI
 
-When the user provides a JSON export from the "Figma to AI JSON" plugin, use this guide to generate pixel-perfect React/Tailwind code.
+When the user provides a JSON export from the "Figma to AI JSON" plugin, use this guide to generate pixel-perfect UI code in your preferred framework.
 
 ## JSON Structure
 
@@ -12,6 +12,18 @@ When the user provides a JSON export from the "Figma to AI JSON" plugin, use thi
   "tree": { ... }       // Component tree
 }
 ```
+
+## Universal Decoding
+
+This format is framework-agnostic. The same JSON can be used to generate:
+- React + Tailwind
+- React + CSS Modules
+- Vue + Scoped CSS
+- Svelte
+- Vanilla HTML/CSS
+
+The `_meta.keys` field documents all short key mappings:
+`t=type, n=name, l=layout, j=justify, al=align, g=gap, r=radius, ...`
 
 ## Token Resolution
 
@@ -27,19 +39,19 @@ Tokens are referenced with `$` prefix. Resolve them from the `tokens` section:
 }
 ```
 
-- `"bg": "$c0"` → `background: #FFFFFF` → `bg-[#FFFFFF]`
-- `"font": "$f0"` → `font-family: Inter` → `font-['Inter']`
-- `"shadow": "$s0"` → `box-shadow: ...` → `shadow-[0_4px_6px_rgba(0,0,0,0.1)]`
+- `"bg": "$c0"` → `background: #FFFFFF`
+- `"f": "$f0"` → `font-family: Inter`
+- `"sh": "$s0"` → `box-shadow: 0 4px 6px rgba(0,0,0,0.1)`
 
-## Node Types → React Elements
+## Node Types (`t`) to HTML Elements
 
-| Type | React Element | Notes |
-|------|---------------|-------|
+| `t` Value | HTML Element | Notes |
+|-----------|--------------|-------|
 | `frame` | `<div>` | Container with layout |
 | `text` | `<span>` or `<p>` | Text content |
 | `img` | `<img>` or `<div>` | Image placeholder |
 | `rect` | `<div>` | Rectangle shape |
-| `ellipse` | `<div>` | Circle/ellipse (use `rounded-full`) |
+| `ellipse` | `<div>` | Circle/ellipse (use `border-radius: 50%`) |
 | `vector` | `<svg>` or icon | Icon placeholder |
 | `instance` | Component | Use `componentName` if available |
 | `group` | `<div>` | Group container |
@@ -48,133 +60,133 @@ Tokens are referenced with `$` prefix. Resolve them from the `tokens` section:
 
 ### Dimensions
 
-| JSON | Tailwind | CSS |
-|------|----------|-----|
-| `w: 320` | `w-[320px]` | `width: 320px` |
-| `w: "fill"` | `w-full` or `flex-1` | `width: 100%` |
-| `w: "hug"` | `w-fit` | `width: fit-content` |
-| `h: 48` | `h-[48px]` | `height: 48px` |
-| `h: "fill"` | `h-full` or `flex-1` | `height: 100%` |
-| `h: "hug"` | `h-fit` | `height: fit-content` |
-| `minW: 100` | `min-w-[100px]` | `min-width: 100px` |
-| `maxW: 500` | `max-w-[500px]` | `max-width: 500px` |
+| JSON | CSS |
+|------|-----|
+| `w: 320` | `width: 320px` |
+| `w: "fill"` | `width: 100%` or `flex: 1` |
+| `w: "hug"` | `width: fit-content` |
+| `h: 48` | `height: 48px` |
+| `h: "fill"` | `height: 100%` or `flex: 1` |
+| `h: "hug"` | `height: fit-content` |
+| `minW: 100` | `min-width: 100px` |
+| `maxW: 500` | `max-width: 500px` |
 
 ### Layout (Flexbox)
 
-| JSON | Tailwind | CSS |
-|------|----------|-----|
-| `layout: "row"` | `flex flex-row` | `display: flex; flex-direction: row` |
-| `layout: "col"` | `flex flex-col` | `display: flex; flex-direction: column` |
-| `gap: 16` | `gap-4` | `gap: 16px` |
-| `wrap: true` | `flex-wrap` | `flex-wrap: wrap` |
+| JSON | CSS |
+|------|-----|
+| `l: "row"` | `display: flex; flex-direction: row` |
+| `l: "col"` | `display: flex; flex-direction: column` |
+| `g: 16` | `gap: 16px` |
+| `wr: true` | `flex-wrap: wrap` |
 
 ### Alignment
 
-| JSON | Tailwind | CSS |
-|------|----------|-----|
-| `justify: "start"` | `justify-start` | `justify-content: flex-start` |
-| `justify: "center"` | `justify-center` | `justify-content: center` |
-| `justify: "end"` | `justify-end` | `justify-content: flex-end` |
-| `justify: "between"` | `justify-between` | `justify-content: space-between` |
-| `align: "start"` | `items-start` | `align-items: flex-start` |
-| `align: "center"` | `items-center` | `align-items: center` |
-| `align: "end"` | `items-end` | `align-items: flex-end` |
-| `align: "stretch"` | `items-stretch` | `align-items: stretch` |
+| JSON | CSS |
+|------|-----|
+| `j: "start"` | `justify-content: flex-start` |
+| `j: "center"` | `justify-content: center` |
+| `j: "end"` | `justify-content: flex-end` |
+| `j: "between"` | `justify-content: space-between` |
+| `al: "start"` | `align-items: flex-start` |
+| `al: "center"` | `align-items: center` |
+| `al: "end"` | `align-items: flex-end` |
+| `al: "stretch"` | `align-items: stretch` |
 
 ### Padding
 
-| JSON | Tailwind | CSS |
-|------|----------|-----|
-| `p: 16` | `p-4` | `padding: 16px` |
-| `p: [16, 24, 16, 24]` | `pt-4 pr-6 pb-4 pl-6` or `py-4 px-6` | `padding: 16px 24px` |
+| JSON | CSS |
+|------|-----|
+| `p: 16` | `padding: 16px` |
+| `p: [16, 24, 16, 24]` | `padding: 16px 24px 16px 24px` |
 
 **Padding array order:** `[top, right, bottom, left]`
 
 ### Background
 
-| JSON | Tailwind |
-|------|----------|
-| `bg: "#FFFFFF"` | `bg-[#FFFFFF]` |
-| `bg: "$c0"` | Resolve token, then `bg-[resolved-color]` |
-| `bg: { type: "linear", ... }` | Use `bg-gradient-to-*` or inline style |
+| JSON | CSS |
+|------|-----|
+| `bg: "#FFFFFF"` | `background: #FFFFFF` |
+| `bg: "$c0"` | Resolve token, then `background: [resolved-color]` |
+| `bg: { type: "linear", ... }` | `background: linear-gradient(...)` |
 
 ### Border Radius
 
-| JSON | Tailwind | CSS |
-|------|----------|-----|
-| `radius: 8` | `rounded-lg` or `rounded-[8px]` | `border-radius: 8px` |
-| `radius: [8, 8, 0, 0]` | `rounded-t-lg` or `rounded-tl-[8px] rounded-tr-[8px]` | Individual corners |
+| JSON | CSS |
+|------|-----|
+| `r: 8` | `border-radius: 8px` |
+| `r: [8, 8, 0, 0]` | `border-radius: 8px 8px 0 0` |
 
 **Radius array order:** `[top-left, top-right, bottom-right, bottom-left]`
 
 ### Border
 
 ```json
-{ "border": { "w": 1, "c": "$c1", "style": "solid" } }
+{ "bd": { "w": 1, "c": "$c1", "style": "solid" } }
 ```
 
-→ `border border-[#resolved-color]` or `border-[1px] border-solid border-[color]`
+→ `border: 1px solid [resolved-color]`
 
 ### Shadow
 
-| JSON | Tailwind |
-|------|----------|
-| `shadow: "$s0"` | `shadow-[resolved-shadow]` |
-| `shadow: "0 4px 6px rgba(0,0,0,0.1)"` | `shadow-[0_4px_6px_rgba(0,0,0,0.1)]` |
+| JSON | CSS |
+|------|-----|
+| `sh: "$s0"` | `box-shadow: [resolved-shadow]` |
+| `sh: "0 4px 6px rgba(0,0,0,0.1)"` | `box-shadow: 0 4px 6px rgba(0,0,0,0.1)` |
 
 ### Opacity
 
-| JSON | Tailwind |
-|------|----------|
-| `opacity: 0.5` | `opacity-50` |
-| `opacity: 0.8` | `opacity-80` |
+| JSON | CSS |
+|------|-----|
+| `o: 0.5` | `opacity: 0.5` |
+| `o: 0.8` | `opacity: 0.8` |
 
 ### Overflow
 
-| JSON | Tailwind |
-|------|----------|
-| `overflow: "hidden"` | `overflow-hidden` |
-| `overflow: "scroll"` | `overflow-auto` |
-| `overflow: "visible"` | (default, no class needed) |
+| JSON | CSS |
+|------|-----|
+| `of: "hidden"` | `overflow: hidden` |
+| `of: "scroll"` | `overflow: auto` |
+| `of: "visible"` | (default) |
 
 ### Absolute Positioning
 
 ```json
-{ "pos": "abs", "x": 100, "y": 50 }
+{ "ps": "abs", "x": 100, "y": 50 }
 ```
 
-→ `absolute left-[100px] top-[50px]`
+→ `position: absolute; left: 100px; top: 50px`
 
 ## Text Properties
 
-| JSON | Tailwind |
-|------|----------|
-| `content: "Hello"` | Text content |
-| `font: "$f0"` | `font-['Inter']` |
-| `size: 16` | `text-base` or `text-[16px]` |
-| `weight: 400` | `font-normal` |
-| `weight: 500` | `font-medium` |
-| `weight: 600` | `font-semibold` |
-| `weight: 700` | `font-bold` |
-| `color: "$c1"` | `text-[#resolved-color]` |
-| `lineH: 24` | `leading-[24px]` |
-| `lineH: 1.5` | `leading-normal` or `leading-[1.5]` |
-| `letterS: -0.02` | `tracking-tight` or `tracking-[-0.02em]` |
-| `textAlign: "center"` | `text-center` |
-| `textAlign: "right"` | `text-right` |
-| `textDecor: "underline"` | `underline` |
-| `textDecor: "line-through"` | `line-through` |
-| `textTransform: "uppercase"` | `uppercase` |
-| `truncate: true` | `truncate` |
-| `truncate: 2` | `line-clamp-2` |
+| JSON | CSS |
+|------|-----|
+| `c: "Hello"` | Text content |
+| `f: "$f0"` | `font-family: Inter` |
+| `s: 16` | `font-size: 16px` |
+| `wt: 400` | `font-weight: 400` |
+| `wt: 500` | `font-weight: 500` |
+| `wt: 600` | `font-weight: 600` |
+| `wt: 700` | `font-weight: 700` |
+| `cl: "$c1"` | `color: [resolved-color]` |
+| `lh: 24` | `line-height: 24px` |
+| `lh: 1.5` | `line-height: 1.5` |
+| `ls: -0.02` | `letter-spacing: -0.02em` |
+| `ta: "center"` | `text-align: center` |
+| `ta: "right"` | `text-align: right` |
+| `td: "underline"` | `text-decoration: underline` |
+| `td: "line-through"` | `text-decoration: line-through` |
+| `tt: "uppercase"` | `text-transform: uppercase` |
+| `tr: true` | `overflow: hidden; text-overflow: ellipsis; white-space: nowrap` |
+| `tr: 2` | `-webkit-line-clamp: 2; display: -webkit-box` |
 
 ## Image Properties
 
-| JSON | Tailwind |
-|------|----------|
-| `fit: "cover"` | `object-cover` |
-| `fit: "contain"` | `object-contain` |
-| `fit: "fill"` | `object-fill` |
+| JSON | CSS |
+|------|-----|
+| `ft: "cover"` | `object-fit: cover` |
+| `ft: "contain"` | `object-fit: contain` |
+| `ft: "fill"` | `object-fit: fill` |
 
 ## Tailwind Value Mapping
 
@@ -199,11 +211,11 @@ For non-standard values, use arbitrary values: `w-[320px]`, `gap-[18px]`
 
 ## Generation Rules
 
-1. **Always use Tailwind classes** - Prefer Tailwind over inline styles
+1. **Use your preferred styling** - Tailwind, CSS Modules, styled-components, scoped CSS, etc.
 2. **Use semantic HTML** - Choose appropriate elements (`button`, `a`, `h1-h6`)
 3. **Preserve hierarchy** - `ch` array represents children in order
 4. **Handle images** - Use placeholder for `img` type nodes
-5. **Component naming** - Use `name` property for component/variable names
+5. **Component naming** - Use `n` (name) property for component/variable names
 6. **Accessibility** - Add appropriate ARIA attributes, alt text
 
 ## Example Transformation
@@ -218,43 +230,40 @@ For non-standard values, use arbitrary values: `w-[320px]`, `gap-[18px]`
     "fonts": { "f0": "Inter" }
   },
   "tree": {
-    "type": "frame",
-    "name": "Button",
-    "layout": "row",
+    "t": "frame",
+    "n": "Button",
+    "l": "row",
     "w": "hug",
     "h": 44,
     "p": [0, 24, 0, 24],
-    "gap": 8,
-    "radius": 8,
+    "g": 8,
+    "r": 8,
     "bg": "$c0",
-    "justify": "center",
-    "align": "center",
+    "j": "center",
+    "al": "center",
     "ch": [
       {
-        "type": "text",
-        "content": "Click me",
-        "font": "$f0",
-        "size": 14,
-        "weight": 500,
-        "color": "$c1"
+        "t": "text",
+        "c": "Click me",
+        "f": "$f0",
+        "s": 14,
+        "wt": 500,
+        "cl": "$c1"
       }
     ]
   }
 }
 ```
 
-### Output React/Tailwind:
-```tsx
-interface ButtonProps {
-  children?: React.ReactNode;
-  onClick?: () => void;
-}
+## Framework Examples
 
+### React + Tailwind
+```tsx
 function Button({ children, onClick }: ButtonProps) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-row items-center justify-center gap-2 h-[44px] px-6 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] transition-colors"
+      className="flex flex-row items-center justify-center gap-2 h-[44px] px-6 rounded-lg bg-[#4F46E5]"
     >
       <span className="font-['Inter'] text-sm font-medium text-white">
         {children ?? 'Click me'}
@@ -262,14 +271,48 @@ function Button({ children, onClick }: ButtonProps) {
     </button>
   );
 }
+```
 
-export default Button;
+### Vue + Scoped CSS
+```vue
+<template>
+  <button class="button" @click="$emit('click')">
+    <span class="label">{{ children ?? 'Click me' }}</span>
+  </button>
+</template>
+
+<style scoped>
+.button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 8px;
+  background: #4F46E5;
+}
+.label {
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 500;
+  color: #FFFFFF;
+}
+</style>
+```
+
+### Vanilla HTML/CSS
+```html
+<button style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 24px; border-radius: 8px; background: #4F46E5;">
+  <span style="font-family: Inter; font-size: 14px; font-weight: 500; color: #FFFFFF;">Click me</span>
+</button>
 ```
 
 ## Notes
 
 - Always resolve token references before generating code
-- Use the `name` property for component and variable naming
+- Use the `n` (name) property for component and variable naming
 - Add hover/focus states for interactive elements
-- Include TypeScript interfaces for props
+- Include TypeScript interfaces for props when using TypeScript
 - Make text content configurable via props where appropriate

@@ -340,26 +340,26 @@ function transformTextNode(
   ctx: TransformContext
 ): ExportNode {
   const node: ExportNode = {
-    type: 'text',
-    content: raw.characters || '',
+    t: 'text',
+    c: raw.characters || '',
   };
 
   if (raw.name) {
-    node.name = raw.name;
+    node.n = raw.name;
   }
 
   if (raw.fontName) {
-    node.font = ctx.useTokens
+    node.f = ctx.useTokens
       ? ctx.tokenExtractor.addFont(raw.fontName.family)
       : raw.fontName.family;
   }
 
   if (raw.fontSize) {
-    (node as ExportNode & { size?: number }).size = raw.fontSize;
+    (node as ExportNode & { s?: number }).s = raw.fontSize;
   }
 
   if (raw.fontWeight) {
-    (node as ExportNode & { weight?: number }).weight = raw.fontWeight;
+    (node as ExportNode & { wt?: number }).wt = raw.fontWeight;
   }
 
   if (raw.fills && raw.fills.length > 0) {
@@ -368,7 +368,7 @@ function transformTextNode(
     );
     if (fill && fill.color) {
       const color = rgbToHex(fill.color.r, fill.color.g, fill.color.b);
-      (node as ExportNode & { color?: string }).color = ctx.useTokens
+      (node as ExportNode & { cl?: string }).cl = ctx.useTokens
         ? ctx.tokenExtractor.addColor(color)
         : color;
     }
@@ -376,19 +376,18 @@ function transformTextNode(
 
   if (raw.lineHeight) {
     if (raw.lineHeight.unit === 'PIXELS') {
-      (node as ExportNode & { lineH?: number }).lineH = raw.lineHeight.value;
+      (node as ExportNode & { lh?: number }).lh = raw.lineHeight.value;
     } else if (raw.lineHeight.unit === 'PERCENT') {
-      (node as ExportNode & { lineH?: number }).lineH =
+      (node as ExportNode & { lh?: number }).lh =
         Math.round(raw.lineHeight.value) / 100;
     }
   }
 
   if (raw.letterSpacing && raw.letterSpacing.value !== 0) {
     if (raw.letterSpacing.unit === 'PIXELS') {
-      (node as ExportNode & { letterS?: number }).letterS =
-        raw.letterSpacing.value;
+      (node as ExportNode & { ls?: number }).ls = raw.letterSpacing.value;
     } else if (raw.letterSpacing.unit === 'PERCENT' && raw.fontSize) {
-      (node as ExportNode & { letterS?: number }).letterS =
+      (node as ExportNode & { ls?: number }).ls =
         (raw.letterSpacing.value / 100) * raw.fontSize;
     }
   }
@@ -400,7 +399,7 @@ function transformTextNode(
       RIGHT: 'right',
       JUSTIFIED: 'justify',
     };
-    (node as ExportNode & { textAlign?: string }).textAlign =
+    (node as ExportNode & { ta?: string }).ta =
       alignMap[raw.textAlignHorizontal];
   }
 
@@ -409,8 +408,7 @@ function transformTextNode(
       UNDERLINE: 'underline',
       STRIKETHROUGH: 'line-through',
     };
-    (node as ExportNode & { textDecor?: string }).textDecor =
-      decorMap[raw.textDecoration];
+    (node as ExportNode & { td?: string }).td = decorMap[raw.textDecoration];
   }
 
   if (raw.textCase && raw.textCase !== 'ORIGINAL') {
@@ -419,22 +417,19 @@ function transformTextNode(
       LOWER: 'lowercase',
       TITLE: 'capitalize',
     };
-    (node as ExportNode & { textTransform?: string }).textTransform =
-      caseMap[raw.textCase];
+    (node as ExportNode & { tt?: string }).tt = caseMap[raw.textCase];
   }
 
   if (raw.textTruncation === 'ENDING') {
     if (raw.maxLines && raw.maxLines > 1) {
-      (node as ExportNode & { truncate?: boolean | number }).truncate =
-        raw.maxLines;
+      (node as ExportNode & { tr?: boolean | number }).tr = raw.maxLines;
     } else {
-      (node as ExportNode & { truncate?: boolean | number }).truncate = true;
+      (node as ExportNode & { tr?: boolean | number }).tr = true;
     }
   }
 
   if (raw.paragraphSpacing && raw.paragraphSpacing > 0) {
-    (node as ExportNode & { paragraphSpacing?: number }).paragraphSpacing =
-      raw.paragraphSpacing;
+    (node as ExportNode & { psp?: number }).psp = raw.paragraphSpacing;
   }
 
   if (raw.textAutoResize && raw.textAutoResize !== 'NONE') {
@@ -445,18 +440,18 @@ function transformTextNode(
     };
     const mapped = resizeMap[raw.textAutoResize];
     if (mapped) {
-      (node as ExportNode & { autoResize?: string }).autoResize = mapped;
+      (node as ExportNode & { ars?: string }).ars = mapped;
     }
   }
 
   if (raw.styledTextSegments && raw.styledTextSegments.length > 1) {
-    const richText = raw.styledTextSegments.map((seg) => {
+    const rT = raw.styledTextSegments.map((seg) => {
       const segment: {
         text: string;
-        font?: string;
-        size?: number;
-        weight?: number;
-        color?: string;
+        f?: string;
+        s?: number;
+        wt?: number;
+        cl?: string;
         italic?: boolean;
         underline?: boolean;
         strikethrough?: boolean;
@@ -466,7 +461,7 @@ function transformTextNode(
       };
 
       if (seg.fontName && seg.fontName.family) {
-        segment.font = ctx.useTokens
+        segment.f = ctx.useTokens
           ? ctx.tokenExtractor.addFont(seg.fontName.family)
           : seg.fontName.family;
 
@@ -479,11 +474,11 @@ function transformTextNode(
       }
 
       if (seg.fontSize) {
-        segment.size = seg.fontSize;
+        segment.s = seg.fontSize;
       }
 
       if (seg.fontWeight) {
-        segment.weight = seg.fontWeight;
+        segment.wt = seg.fontWeight;
       }
 
       if (seg.fills && seg.fills.length > 0) {
@@ -492,7 +487,7 @@ function transformTextNode(
         );
         if (fill && fill.color) {
           const color = rgbToHex(fill.color.r, fill.color.g, fill.color.b);
-          segment.color = ctx.useTokens
+          segment.cl = ctx.useTokens
             ? ctx.tokenExtractor.addColor(color)
             : color;
         }
@@ -511,7 +506,7 @@ function transformTextNode(
       return segment;
     });
 
-    (node as ExportNode & { richText?: typeof richText }).richText = richText;
+    (node as ExportNode & { rT?: typeof rT }).rT = rT;
   }
 
   return node;
@@ -522,11 +517,11 @@ function transformImageNode(
   _ctx: TransformContext
 ): ExportNode {
   const node: ExportNode = {
-    type: 'img',
+    t: 'img',
   };
 
   if (raw.name) {
-    node.name = raw.name;
+    node.n = raw.name;
     (node as ExportNode & { alt?: string }).alt = raw.name;
   }
 
@@ -535,30 +530,28 @@ function transformImageNode(
 
   const radius = extractRadius(raw);
   if (radius !== undefined) {
-    node.radius = radius;
+    node.r = radius;
   }
 
   const imageFill = raw.fills?.find((f) => f.type === 'IMAGE');
   if (imageFill) {
     const scaleMode = imageFill.scaleMode;
     if (scaleMode === 'FILL') {
-      (node as ExportNode & { fit?: string }).fit = 'cover';
+      (node as ExportNode & { ft?: string }).ft = 'cover';
     } else if (scaleMode === 'FIT') {
-      (node as ExportNode & { fit?: string }).fit = 'contain';
+      (node as ExportNode & { ft?: string }).ft = 'contain';
     } else if (scaleMode === 'STRETCH') {
-      (node as ExportNode & { fit?: string }).fit = 'fill';
+      (node as ExportNode & { ft?: string }).ft = 'fill';
     }
   }
 
   if (raw.imageRef) {
-    (node as ExportNode & { imageRef?: string }).imageRef = raw.imageRef;
+    (node as ExportNode & { iR?: string }).iR = raw.imageRef;
   }
 
-  (node as ExportNode & { nodeId?: string }).nodeId = raw.id;
+  (node as ExportNode & { nId?: string }).nId = raw.id;
 
-  (
-    node as ExportNode & { originalSize?: { w: number; h: number } }
-  ).originalSize = {
+  (node as ExportNode & { oS?: { w: number; h: number } }).oS = {
     w: Math.round(raw.width),
     h: Math.round(raw.height),
   };
@@ -578,9 +571,9 @@ function transformImageNode(
       if (cropX > 0.01 || cropY > 0.01 || cropW < 0.99 || cropH < 0.99) {
         (
           node as ExportNode & {
-            cropRect?: { x: number; y: number; w: number; h: number };
+            cR?: { x: number; y: number; w: number; h: number };
           }
-        ).cropRect = {
+        ).cR = {
           x: Math.round(cropX * 100) / 100,
           y: Math.round(cropY * 100) / 100,
           w: Math.round(cropW * 100) / 100,
@@ -660,18 +653,18 @@ export function transformNode(
   }
 
   const node = {
-    type: mapNodeType(raw.type),
+    t: mapNodeType(raw.type),
   } as ExportNode;
 
   if (raw.name) {
-    node.name = raw.name;
+    node.n = raw.name;
   }
 
   if (raw.layoutMode && raw.layoutMode !== 'NONE') {
-    node.layout = raw.layoutMode === 'HORIZONTAL' ? 'row' : 'col';
+    node.l = raw.layoutMode === 'HORIZONTAL' ? 'row' : 'col';
 
     if (raw.itemSpacing && raw.itemSpacing > 0) {
-      node.gap = raw.itemSpacing;
+      node.g = raw.itemSpacing;
     }
 
     const padding = extractPadding(raw);
@@ -681,16 +674,16 @@ export function transformNode(
 
     const justify = mapJustify(raw.primaryAxisAlignItems);
     if (justify && justify !== 'start') {
-      node.justify = justify;
+      node.j = justify;
     }
 
     const align = mapAlign(raw.counterAxisAlignItems);
     if (align && align !== 'start') {
-      node.align = align;
+      node.al = align;
     }
 
     if (raw.layoutWrap === 'WRAP') {
-      node.wrap = true;
+      node.wr = true;
     }
   }
 
@@ -698,7 +691,7 @@ export function transformNode(
   node.h = extractHeight(raw);
 
   if (raw.layoutPositioning === 'ABSOLUTE') {
-    node.pos = 'abs';
+    node.ps = 'abs';
     node.x = Math.round(raw.x);
     node.y = Math.round(raw.y);
   }
@@ -707,7 +700,7 @@ export function transformNode(
     const h = mapConstraintH(raw.constraints.horizontal);
     const v = mapConstraintV(raw.constraints.vertical);
     if (h !== 'left' || v !== 'top') {
-      node.constraints = { h, v } as Constraints;
+      node.cn = { h, v } as Constraints;
     }
   }
 
@@ -717,12 +710,12 @@ export function transformNode(
   }
 
   if (raw.opacity !== undefined && raw.opacity < 1) {
-    node.opacity = Math.round(raw.opacity * 100) / 100;
+    node.o = Math.round(raw.opacity * 100) / 100;
   }
 
   const radius = extractRadius(raw);
   if (radius !== undefined) {
-    node.radius = radius;
+    node.r = radius;
   }
 
   const border = extractBorder(
@@ -732,38 +725,37 @@ export function transformNode(
     ctx
   );
   if (border) {
-    node.border = border;
+    node.bd = border;
   }
 
   const shadow = extractShadow(raw.effects, ctx);
   if (shadow) {
-    node.shadow = shadow;
+    node.sh = shadow;
   }
 
   const blurEffect = raw.effects?.find(
     (e) => e.type === 'BACKGROUND_BLUR' && e.visible !== false
   );
   if (blurEffect && blurEffect.radius) {
-    node.blur = blurEffect.radius;
+    node.bl = blurEffect.radius;
   }
 
   const backdropBlurEffect = raw.effects?.find(
     (e) => e.type === 'LAYER_BLUR' && e.visible !== false
   );
   if (backdropBlurEffect && backdropBlurEffect.radius) {
-    (node as ExportNode & { backdropBlur?: number }).backdropBlur =
-      backdropBlurEffect.radius;
+    (node as ExportNode & { bbl?: number }).bbl = backdropBlurEffect.radius;
   }
 
   if (raw.blendMode) {
     const mappedBlend = mapBlendMode(raw.blendMode);
     if (mappedBlend) {
-      (node as ExportNode & { blendMode?: string }).blendMode = mappedBlend;
+      (node as ExportNode & { bm?: string }).bm = mappedBlend;
     }
   }
 
   if (raw.rotation) {
-    (node as ExportNode & { rotate?: number }).rotate =
+    (node as ExportNode & { rt?: number }).rt =
       Math.round(raw.rotation * 100) / 100;
   }
 
@@ -773,59 +765,59 @@ export function transformNode(
       const commonRatios = [16 / 9, 4 / 3, 3 / 2, 1 / 1, 9 / 16, 3 / 4, 2 / 3];
       const isCommon = commonRatios.some((r) => Math.abs(ratio - r) < 0.05);
       if (isCommon) {
-        (node as ExportNode & { aspectRatio?: number }).aspectRatio =
+        (node as ExportNode & { ar?: number }).ar =
           Math.round(ratio * 100) / 100;
       }
     }
   }
 
   if (raw.layoutPositioning === 'ABSOLUTE' && raw.orderIndex !== undefined) {
-    (node as ExportNode & { zIndex?: number }).zIndex = raw.orderIndex + 1;
+    (node as ExportNode & { z?: number }).z = raw.orderIndex + 1;
   }
 
   if (raw.orderIndex !== undefined && raw.siblingCount !== undefined) {
     if (raw.siblingCount > 1) {
-      (node as ExportNode & { order?: number }).order = raw.orderIndex;
+      (node as ExportNode & { ord?: number }).ord = raw.orderIndex;
 
       if (raw.orderIndex === 0) {
-        (node as ExportNode & { isFirst?: boolean }).isFirst = true;
+        (node as ExportNode & { iF?: boolean }).iF = true;
       }
 
       if (raw.orderIndex === raw.siblingCount - 1) {
-        (node as ExportNode & { isLast?: boolean }).isLast = true;
+        (node as ExportNode & { iL?: boolean }).iL = true;
       }
     }
   }
 
   const responsive = analyzeResponsive(raw, raw.parentLayoutMode);
   if (responsive) {
-    node.responsive = responsive;
+    node.rs = responsive;
   }
 
-  const devInfo: {
+  const di: {
     notes?: string;
     description?: string;
     pluginData?: Record<string, string>;
   } = {};
 
   if (raw.description) {
-    devInfo.description = raw.description;
+    di.description = raw.description;
   }
 
   if (raw.devNotes) {
-    devInfo.notes = raw.devNotes;
+    di.notes = raw.devNotes;
   }
 
   if (raw.pluginData && Object.keys(raw.pluginData).length > 0) {
-    devInfo.pluginData = raw.pluginData;
+    di.pluginData = raw.pluginData;
   }
 
-  if (Object.keys(devInfo).length > 0) {
-    (node as ExportNode & { devInfo?: typeof devInfo }).devInfo = devInfo;
+  if (Object.keys(di).length > 0) {
+    (node as ExportNode & { di?: typeof di }).di = di;
   }
 
   if (raw.clipsContent) {
-    node.overflow = 'hidden';
+    node.of = 'hidden';
   }
 
   if (raw.children && raw.children.length > 0) {
@@ -853,11 +845,11 @@ export function transformNode(
 
   const semantic = analyzeSemantics(raw);
   if (semantic) {
-    node.semantic = semantic;
+    node.sm = semantic;
   }
 
   if (raw.reactions && raw.reactions.length > 0) {
-    const interactions = raw.reactions.map((r) => {
+    const ia = raw.reactions.map((r) => {
       const interaction: {
         trigger: 'click' | 'hover' | 'press' | 'drag';
         action:
@@ -891,13 +883,12 @@ export function transformNode(
       return interaction;
     });
 
-    (node as ExportNode & { interactions?: typeof interactions }).interactions =
-      interactions;
+    (node as ExportNode & { ia?: typeof ia }).ia = ia;
   }
 
   const patternInfo = detectPattern(raw);
   if (patternInfo) {
-    node.patternInfo = patternInfo;
+    node.pi = patternInfo;
   }
 
   return node;

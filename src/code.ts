@@ -32,12 +32,21 @@ async function exportSelection(
     v: '1.0',
     _meta: {
       format:
-        'Figma to AI JSON - Optimized format for LLMs to generate React/Tailwind code. ' +
+        'Figma to AI JSON - Universal format for LLMs to generate UI code in any framework/styling system. ' +
         'This format describes UI components with layout, styling, and semantic information.',
       types:
         'frame=div/section/container,text=p/span/h1-h6,img=img/Image,' +
         'rect=div with bg,ellipse=rounded-full div,vector=svg,' +
         'group=fragment/div,instance=reusable component',
+      keys:
+        'Short keys: t=type,n=name,l=layout,g=gap,j=justify,al=align,wr=wrap,' +
+        'ps=pos,cn=constraints,o=opacity,r=radius,bd=border,sh=shadow,bl=blur,' +
+        'bbl=backdropBlur,bm=blendMode,rt=rotate,ar=aspectRatio,z=zIndex,' +
+        'ord=order,iF=isFirst,iL=isLast,rs=responsive,di=devInfo,vs=visible,' +
+        'of=overflow,sm=semantic,ia=interactions,pi=patternInfo,' +
+        'c=content,f=font,s=size,wt=weight,cl=color,lh=lineH,ls=letterS,' +
+        'ta=textAlign,td=textDecor,tt=textTransform,tr=truncate,psp=paragraphSpacing,' +
+        'ars=autoResize,rT=richText,ft=fit,iR=imageRef,oS=originalSize,cR=cropRect,nId=nodeId',
       base:
         'w=width,h=height,minW/maxW=min/max-width,minH/maxH=min/max-height,' +
         'p=padding(number|[t,r,b,l]),gap=gap,layout=row|col(flex-direction),' +
@@ -89,33 +98,21 @@ async function exportSelection(
         'responsive.fluid=w-full needed,' +
         'responsive.grow=flex-grow,responsive.shrink=flex-shrink',
       devInfo:
-        'devInfo.notes=designer notes from layer name [note: ...],' +
-        'devInfo.description=component description from Figma,' +
-        'devInfo.pluginData=data from other Figma plugins',
-      tailwind:
-        'Mapping guide: ' +
-        'layout:row→flex flex-row,layout:col→flex flex-col,' +
-        'justify:center→justify-center,justify:between→justify-between,' +
-        'align:center→items-center,align:stretch→items-stretch,' +
-        'w:fill→w-full/flex-1,h:hug→h-fit,' +
-        'p:16→p-4,p:[16,24,16,24]→py-4 px-6,' +
-        'gap:16→gap-4,radius:8→rounded-lg,radius:9999→rounded-full,' +
-        'shadow→shadow-md/shadow-lg,blur:10→backdrop-blur-sm,' +
-        'truncate:true→truncate,truncate:2→line-clamp-2,' +
-        'pos:abs→absolute,overflow:hidden→overflow-hidden',
-      react:
-        'Component mapping: ' +
-        'semantic.role:button→<button> or Button component,' +
-        'semantic.role:input→<input> or Input component,' +
-        'semantic.role:card→Card component with children,' +
-        'semantic.role:link→<a> or Link component,' +
-        'semantic.role:avatar→Avatar component,' +
-        'semantic.role:badge→Badge component,' +
-        'patternInfo.pattern:list→{items.map(item => ...)},' +
-        'patternInfo.pattern:grid→grid grid-cols-{columns},' +
-        'interactions.action:navigate→useRouter/Link,' +
-        'interactions.action:url→<a href={url} target="_blank">,' +
-        'instance with variantProps→pass as component props',
+        'di.notes=designer notes from layer name [note: ...],' +
+        'di.description=component description from Figma,' +
+        'di.pluginData=data from other Figma plugins',
+      css:
+        'CSS property mapping: ' +
+        'l:row→display:flex;flex-direction:row,l:col→display:flex;flex-direction:column,' +
+        'j:center→justify-content:center,al:center→align-items:center,' +
+        'g:16→gap:16px,p:16→padding:16px,r:8→border-radius:8px,' +
+        'o:0.5→opacity:0.5,ps:abs→position:absolute',
+      html:
+        'HTML element mapping: ' +
+        't:frame→<div>,t:text→<p>/<span>/<h1-h6>,t:img→<img>,' +
+        't:rect→<div>,t:ellipse→<div>,t:vector→<svg>,' +
+        'sm.role:button→<button>,sm.role:link→<a>,sm.role:nav→<nav>,' +
+        'sm.role:header→<header>,sm.role:footer→<footer>',
     },
     name: node.name,
     tokens: options.extractTokens

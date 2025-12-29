@@ -125,54 +125,54 @@ export interface Constraints {
 
 export interface BaseNode {
   id?: string;
-  name?: string;
-  type: string;
+  n?: string;
+  t: string;
   w?: number | 'fill' | 'hug';
   h?: number | 'fill' | 'hug';
   minW?: number;
   maxW?: number;
   minH?: number;
   maxH?: number;
-  layout?: 'row' | 'col';
-  gap?: number;
+  l?: 'row' | 'col';
+  g?: number;
   p?: number | [number, number, number, number];
-  justify?: 'start' | 'center' | 'end' | 'between';
-  align?: 'start' | 'center' | 'end' | 'stretch';
-  wrap?: boolean;
-  pos?: 'abs' | 'rel';
+  j?: 'start' | 'center' | 'end' | 'between';
+  al?: 'start' | 'center' | 'end' | 'stretch';
+  wr?: boolean;
+  ps?: 'abs' | 'rel';
   x?: number;
   y?: number;
-  constraints?: Constraints;
+  cn?: Constraints;
   bg?: string | GradientBackground;
-  opacity?: number;
-  radius?: number | [number, number, number, number];
-  border?: BorderStyle;
-  shadow?: string;
-  blur?: number;
-  backdropBlur?: number;
-  blendMode?: string;
-  rotate?: number;
-  aspectRatio?: number;
-  zIndex?: number;
-  order?: number;
-  isFirst?: boolean;
-  isLast?: boolean;
-  responsive?: ResponsiveInfo;
-  devInfo?: DevAnnotations;
-  visible?: boolean;
-  overflow?: 'hidden' | 'scroll' | 'visible';
-  semantic?: SemanticInfo;
-  interactions?: InteractionInfo[];
-  patternInfo?: PatternInfo;
+  o?: number;
+  r?: number | [number, number, number, number];
+  bd?: BorderStyle;
+  sh?: string;
+  bl?: number;
+  bbl?: number;
+  bm?: string;
+  rt?: number;
+  ar?: number;
+  z?: number;
+  ord?: number;
+  iF?: boolean;
+  iL?: boolean;
+  rs?: ResponsiveInfo;
+  di?: DevAnnotations;
+  vs?: boolean;
+  of?: 'hidden' | 'scroll' | 'visible';
+  sm?: SemanticInfo;
+  ia?: InteractionInfo[];
+  pi?: PatternInfo;
   ch?: ExportNode[];
 }
 
 export interface TextSegment {
   text: string;
-  font?: string;
-  size?: number;
-  weight?: number;
-  color?: string;
+  f?: string;
+  s?: number;
+  wt?: number;
+  cl?: string;
   italic?: boolean;
   underline?: boolean;
   strikethrough?: boolean;
@@ -180,56 +180,56 @@ export interface TextSegment {
 }
 
 export interface TextNode extends BaseNode {
-  type: 'text';
-  content: string;
-  font?: string;
-  size?: number;
-  weight?: number;
-  color?: string;
-  lineH?: number | string;
-  letterS?: number;
-  textAlign?: 'left' | 'center' | 'right' | 'justify';
-  textDecor?: 'underline' | 'line-through' | 'none';
-  textTransform?: 'uppercase' | 'lowercase' | 'capitalize' | 'none';
-  truncate?: boolean | number;
-  paragraphSpacing?: number;
-  autoResize?: 'none' | 'height' | 'width-height';
-  richText?: TextSegment[];
+  t: 'text';
+  c: string;
+  f?: string;
+  s?: number;
+  wt?: number;
+  cl?: string;
+  lh?: number | string;
+  ls?: number;
+  ta?: 'left' | 'center' | 'right' | 'justify';
+  td?: 'underline' | 'line-through' | 'none';
+  tt?: 'uppercase' | 'lowercase' | 'capitalize' | 'none';
+  tr?: boolean | number;
+  psp?: number;
+  ars?: 'none' | 'height' | 'width-height';
+  rT?: TextSegment[];
 }
 
 export interface ImageNode extends BaseNode {
-  type: 'img';
+  t: 'img';
   src?: string;
-  fit?: 'cover' | 'contain' | 'fill' | 'none';
+  ft?: 'cover' | 'contain' | 'fill' | 'none';
   alt?: string;
-  imageRef?: string;
-  originalSize?: { w: number; h: number };
-  cropRect?: { x: number; y: number; w: number; h: number };
-  nodeId?: string;
+  iR?: string;
+  oS?: { w: number; h: number };
+  cR?: { x: number; y: number; w: number; h: number };
+  nId?: string;
 }
 
 export interface FrameNode extends BaseNode {
-  type: 'frame';
+  t: 'frame';
 }
 
 export interface RectNode extends BaseNode {
-  type: 'rect';
+  t: 'rect';
 }
 
 export interface EllipseNode extends BaseNode {
-  type: 'ellipse';
+  t: 'ellipse';
 }
 
 export interface VectorNode extends BaseNode {
-  type: 'vector';
+  t: 'vector';
 }
 
 export interface GroupNode extends BaseNode {
-  type: 'group';
+  t: 'group';
 }
 
 export interface InstanceNode extends BaseNode {
-  type: 'instance';
+  t: 'instance';
   componentName?: string;
   variantProps?: Record<string, string>;
   componentDesc?: string;
@@ -248,6 +248,7 @@ export type ExportNode =
 export interface MetaInfo {
   format: string;
   types: string;
+  keys: string;
   base: string;
   text: string;
   image: string;
@@ -259,8 +260,8 @@ export interface MetaInfo {
   patterns: string;
   responsive: string;
   devInfo: string;
-  tailwind: string;
-  react: string;
+  css: string;
+  html: string;
 }
 
 export interface ExportResult {

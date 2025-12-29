@@ -1,6 +1,6 @@
 # Figma to AI JSON
 
-Figma plugin that exports designs to a self-documenting AI-optimized JSON format. The export includes comprehensive metadata (`_meta`) that guides LLMs (Claude, ChatGPT, Gemini) to generate pixel-perfect React/Tailwind code without external documentation.
+Figma plugin that exports designs to a self-documenting AI-optimized JSON format. The export includes comprehensive metadata (`_meta`) that guides LLMs (Claude, ChatGPT, Gemini) to generate pixel-perfect UI code in any framework/styling system without external documentation.
 
 ## Key Features
 
@@ -10,6 +10,20 @@ Figma plugin that exports designs to a self-documenting AI-optimized JSON format
 - **Design Tokens** — extracts colors, fonts, shadows into reusable references
 - **Responsive Hints** — detects breakpoints and adaptive layouts
 - **~70% Smaller** — short keys and token deduplication minimize AI token usage
+
+## Framework Flexibility
+
+The JSON format is framework-agnostic - works with any UI framework and styling solution:
+- **React** + Tailwind CSS, CSS Modules, styled-components
+- **Vue** + Scoped CSS, Tailwind, UnoCSS
+- **Svelte** + Scoped styles, Tailwind
+- **Angular** + Component styles
+- **Vanilla HTML/CSS**
+
+The `_meta` object documents:
+- `keys` - Short key legend (t=type, n=name, l=layout, etc.)
+- `css` - Generic CSS property mappings
+- `html` - HTML element mappings
 
 ## Installation
 
@@ -33,7 +47,7 @@ Then in Figma Desktop:
 4. **Paste** into AI with prompt:
 
 ```
-Here's a Figma export. Generate a React component with Tailwind CSS:
+Here's a Figma export. Generate a component using your preferred framework/styling:
 [paste JSON]
 ```
 
@@ -73,12 +87,18 @@ The AI will use embedded `_meta` documentation to interpret the format correctly
 
 | Key | Meaning | Key | Meaning |
 |-----|---------|-----|---------|
+| `t` | type | `n` | name |
+| `l` | layout | `g` | gap |
+| `j` | justify | `al` | align |
 | `w` | width | `h` | height |
 | `p` | padding | `bg` | background |
-| `ch` | children | `sem` | semantic role |
-| `layout` | flex direction | `gap` | spacing |
+| `r` | radius | `bd` | border |
+| `sh` | shadow | `o` | opacity |
+| `c` | content | `f` | font |
+| `s` | size | `wt` | weight |
+| `sm` | semantic | `pi` | patternInfo |
+| `ch` | children | `$c0` | color token |
 | `"fill"` | 100% (flex-grow) | `"hug"` | fit-content |
-| `$c0` | color token | `$f0` | font token |
 
 ## Processing Pipeline
 
