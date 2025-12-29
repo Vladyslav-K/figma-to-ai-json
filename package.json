@@ -6,7 +6,8 @@
     "build": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6 && cp src/ui.html dist/ui.html",
     "watch": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6 --watch",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,html,css,json}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,html,css,json}\"",
+    "format-and-check": "pnpm run format & pnpm run typecheck"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.100.2",
